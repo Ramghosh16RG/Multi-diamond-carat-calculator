@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SVARNA — Multi-Diamond Carat & Price Calculator</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f0f10;
+  --panel:#111;
+  --panel-2:#0b0b0b;
+  --muted:#aaa;
+  --gold:#f1c40f;
+  --accent:#e0b500;
+  --accent-2:#28a745;
+  --glass: rgba(255,255,255,0.03);
+  --radius:14px;
+  --max-w:1100px;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;padding:0;font-family:'Roboto',sans-serif;color:#fff;background:linear-gradient(180deg,#0b0b0b,#151515);}
+body{display:flex;justify-content:center;align-items:flex-start;padding:28px 16px;}
+.app{width:100%;max-width:var(--max-w);display:grid;grid-template-columns:420px 1fr;gap:26px;align-items:start;}
+.panel{background:linear-gradient(180deg,var(--panel),#0b0b0b);border-radius:var(--radius);padding:22px;box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03);}
+.brand{text-align:center;font-family:'Playfair Display',serif;font-size:22px;color:var(--gold);margin-bottom:14px;}
+.sub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:18px;}
+form{display:flex;flex-direction:column;gap:10px;}
+label{font-weight:500;color:var(--gold);font-size:13px;}
+input[type="number"],select{width:100%;padding:10px 12px;border-radius:10px;background:var(--panel-2);color:#fff;border:1px solid rgba(255,255,255,0.04);font-size:14px;}
+input::placeholder{color:#777;}
+.row{display:flex;gap:10px;flex-wrap:wrap;}
+.row .col{flex:1;min-width:120px;}
+.controls{display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.btn{background:var(--gold);color:#111;padding:12px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:700;flex:1;min-width:100px;}
+.btn.secondary{background:transparent;color:var(--gold);border:1px solid rgba(241,196,15,0.12);}
+.btn.positive{background:var(--accent-2);color:#fff;}
+.btn.small{padding:8px 10px;font-size:13px;border-radius:8px;width:auto;}
+
+/* Right panel */
+.right{display:flex;flex-direction:column;gap:18px;}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);padding:18px;box-shadow:0 8px 30px rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.03);}
+.resultsTitle{font-family:'Playfair Display',serif;color:var(--gold);font-size:18px;margin-bottom:8px;}
+pre.resultBox{white-space:pre-wrap;margin:0;padding:12px;background:rgba(255,255,255,0.02);border-radius:10px;font-size:14px;color:#eaeaea;line-height:1.35;max-height:400px;overflow:auto;}
+.historyWrap{display:flex;justify-content:flex-end;align-items:center;gap:10px;}
+#historyBtn{background:transparent;border:1px solid rgba(241,196,15,0.12);color:var(--gold);padding:8px 10px;border-radius:8px;font-weight:600;cursor:pointer;}
+#historyBtn:hover{background:rgba(241,196,15,0.03);}
+#historySection{display:none;overflow:auto;max-height:600px;}
+.histList{display:flex;flex-direction:column;gap:12px;}
+details.record{background:linear-gradient(180deg,#0b0b0b,#121212);border-radius:12px;padding:10px;border:1px solid rgba(255,255,255,0.03);}
+details summary{list-style:none;display:flex;justify-content:space-between;align-items:center;cursor:pointer;padding:8px 6px;font-weight:600;color:var(--gold);}
+.recordMeta{font-size:13px;color:var(--muted);}
+.recordBody{margin-top:10px;padding-top:6px;border-top:1px dashed rgba(255,255,255,0.03);overflow:auto;max-height:300px;}
+.miniTable{width:100%;border-collapse:collapse;font-size:13px;overflow:auto;}
+.miniTable th,.miniTable td{padding:8px;border:1px solid rgba(255,255,255,0.03);text-align:center;}
+.miniTable th{background:#0f0f0f;color:var(--gold);}
+.miniTotals{display:flex;justify-content:space-between;margin-top:10px;gap:12px;flex-wrap:wrap;}
+.muted{color:var(--muted);font-size:13px;}
+.exportWrap{display:flex;justify-content:flex-end;margin-top:8px;flex-wrap:wrap;}
+.exportBtn{background:var(--gold);color:#111;padding:10px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:700;white-space:nowrap;}
+
+/* Fully responsive adjustments */
+@media (max-width:1024px){.app{grid-template-columns:1fr;padding-bottom:40px}.panel{order:2}.right{order:1;}}
+@media (max-width:520px){
+  body{padding:18px;}
+  .brand{font-size:20px;}
+  input,select{font-size:14px;padding:10px;}
+  .btn{font-size:15px;padding:11px;min-width:80px;}
+  .row .col{min-width:100px;}
+  .recordBody{font-size:13px;}
+  .miniTable th,.miniTable td{padding:6px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+<div class="app" role="application" aria-label="SVARNA Calculator">
+  <!-- Left Form -->
+  <div class="panel">
+    <div class="brand">SVARNA</div>
+    <div class="sub">Multi-Diamond Carat & Price Calculator</div>
+    <form id="form">
+      <label>Shape Code</label>
+      <select id="shape">
+        <option value="P">P - Princess</option>
+        <option value="B">B - Baguette</option>
+        <option value="O">O - Oval</option>
+        <option value="H">H - Heart</option>
+        <option value="M">M - Marquise</option>
+      </select>
+      <div class="row">
+        <div class="col"><label>Length (mm)</label><input id="length" type="number" step="any" placeholder="eg. 5.2" /></div>
+        <div class="col"><label>Width (mm)</label><input id="width" type="number" step="any" placeholder="eg. 4.1" /></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Depth (%)</label><input id="depth" type="number" step="any" placeholder="eg. 60" /></div>
+        <div class="col"><label>Quantity</label><input id="qty" type="number" step="1" placeholder="eg. 2" /></div>
+      </div>
+      <div class="controls">
+        <button type="button" id="addBtn" class="btn btn-small">➕ Add Diamond</button>
+        <button type="button" id="clearAll" class="btn secondary btn-small">Clear Items</button>
+      </div>
+      <label style="margin-top:12px">Do you want to calculate price?</label>
+      <select id="calcPrice"><option value="no">No</option><option value="yes">Yes</option></select>
+      <div id="priceSection" style="display:none"></div>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <button type="button" id="finishBtn" class="btn">📊 Show Summary & Save</button>
+        <button type="button" id="resetBtn" class="btn secondary">Reset Form</button>
+      </div>
+      <div style="margin-top:12px;color:var(--muted);font-size:13px"><strong>Items in cart:</strong> <span id="count">0</span></div>
+    </form>
+  </div>
+
+  <!-- Right Results & History -->
+  <div class="right">
+    <div class="card">
+      <div class="resultsTitle">Results</div>
+      <pre id="resultText" class="resultBox">No calculation yet. Add diamonds and click "Show Summary".</pre>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
+        <div class="historyWrap"><button id="historyBtn" title="Show Saved History">📜 Saved History</button></div>
+        <div class="muted">SVARNA Luxury Tools™ - Ramprasad Ghosh</div>
+      </div>
+    </div>
+    <div id="historySection" class="card" aria-live="polite">
+      <h3 style="margin:0 0 8px 0;color:var(--gold);font-family:'Playfair Display',serif">📜 Saved History</h3>
+      <div class="histList" id="histList"></div>
+      <div class="exportWrap"><button class="exportBtn" id="exportCSV">⬇️ Export CSV</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const shapeConstants = { P:0.0061, B:0.0058, O:0.0062, H:0.0059, M:0.0058 };
+  const el=(id)=>document.getElementById(id);
+  const shapeEl=el('shape'),lengthEl=el('length'),widthEl=el('width'),depthEl=el('depth'),qtyEl=el('qty'),
+        addBtn=el('addBtn'),finishBtn=el('finishBtn'),calcPrice=el('calcPrice'),priceSection=el('priceSection'),
+        resultText=el('resultText'),countEl=el('count'),historyBtn=el('historyBtn'),historySection=el('historySection'),
+        histList=el('histList'),exportCSVbtn=el('exportCSV'),clearAllBtn=el('clearAll'),resetFormBtn=el('resetBtn');
+  let cart=[],latestSummary=null,history=JSON.parse(localStorage.getItem('svarna_history_v1')||'[]');
+
+  function fmt(n,d=2){return isFinite(n)?Number(n).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d}):'0.00'}
+  function calcCarat(len,wid,depthPct,shape){const k=shapeConstants[shape]||0;return len*wid*(len*(depthPct/100))*k;}
+  function updateCount(){countEl.textContent=cart.length;}
+  function clearInputs(){lengthEl.value='';widthEl.value='';depthEl.value='';qtyEl.value='';}
+
+  addBtn.addEventListener('click',()=>{
+    const shape=shapeEl.value,len=parseFloat(lengthEl.value),wid=parseFloat(widthEl.value),depth=parseFloat(depthEl.value),qty=parseInt(qtyEl.value,10);
+    if([len,wid,depth,qty].some(v=>isNaN(v)||v<=0)){alert('Please enter valid length, width, depth (%) and quantity.');return;}
+    const caratEach=calcCarat(len,wid,depth,shape),totalCarat=caratEach*qty;
+    cart.push({shape,length:len,width:wid,depth,qty,caratEach,totalCarat});
+    updateCount();clearInputs();calcPrice.value='no';priceSection.style.display='none';
+    alert(`Added: ${shape} — total ${fmt(totalCarat,6)} ct`);
+  });
+
+  clearAllBtn.addEventListener('click',()=>{if(!cart.length)return;if(confirm('Clear all added diamond items?')){cart=[];updateCount();}});
+
+  calcPrice.addEventListener('change',()=>{
+    if(calcPrice.value==='yes'){
+      if(!cart.length){alert('Add at least one diamond item first.');calcPrice.value='no';return;}
+      const unique=[...new Set(cart.map(i=>i.shape))];
+      priceSection.innerHTML='<label style="color:var(--gold);font-weight:600">Price per carat for each shape</label>';
+      unique.forEach(s=>{const row=document.createElement('div');row.style.marginTop='8px';
+      row.innerHTML=`<label style="display:block;margin-bottom:6px;color:#fff;font-weight:500">${s} — ₹ per ct</label><input id="price_${s}" type="number" step="any" placeholder="eg. 45000" />`;
+      priceSection.appendChild(row);});priceSection.style.display='block';
+    } else{priceSection.style.display='none';priceSection.innerHTML='';}
+  });
+
+  finishBtn.addEventListener('click',()=>{
+    if(!cart.length){alert('Add at least one diamond item');return;}
+    let out='💎 FINAL CARAT SUMMARY 💎\n\n',totalCombined=0,shapes=new Set();
+    cart.forEach((d,i)=>{out+=`#${i+1} ${d.shape} → ${d.caratEach.toFixed(6)} ct × ${d.qty} = ${d.totalCarat.toFixed(6)} ct\n`;totalCombined+=d.totalCarat;shapes.add(d.shape);});
+    out+=`\n✨ TOTAL COMBINED CARAT: ${totalCombined.toFixed(6)} ct ✨\n`;
+    let totalValue=0,prices={};
+    if(calcPrice.value==='yes'){out+='\n💰 PRICE SUMMARY 💰\n';shapes.forEach(s=>{const inp=document.getElementById(`price_${s}`);const perCt=parseFloat(inp?.value||0);prices[s]=isFinite(perCt)?perCt:0;
+      const shapeTotal=cart.filter(x=>x.shape===s).reduce((a,b)=>a+b.totalCarat,0);const val=prices[s]*shapeTotal;totalValue+=val;out+=`${s}: ₹${fmt(val,2)}  (rate ₹${fmt(prices[s],2)} per ct)\n`;});out+=`\n💰 TOTAL ESTIMATED VALUE: ₹${fmt(totalValue,2)}\n`;}
+    resultText.textContent=out;
+    latestSummary={diamonds:cart.map(d=>({...d})),totalCarat:totalCombined,totalValue,prices};
+    
+    // ✅ Save automatically to history
+    saveToHistory();
+
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+
+  function saveToHistory(){
+    if(!latestSummary){alert('Generate a summary first');return;}
+    const record={id:Date.now(),date:new Date().toLocaleString(),diamonds:latestSummary.diamonds.map(d=>({shape:d.shape,qty:d.qty,eachCt:d.caratEach,totalCt:d.totalCarat})),prices:latestSummary.prices||{},totalCarat:latestSummary.totalCarat,totalValue:latestSummary.totalValue||0};
+    history.unshift(record);
+    localStorage.setItem('svarna_history_v1',JSON.stringify(history));
+    renderHistory();
+    cart=[];latestSummary=null;updateCount();
+    resultText.textContent='Saved to history ✅';
+  }
+
+  historyBtn.addEventListener('click',()=>{historySection.style.display=(historySection.style.display==='block')?'none':'block';if(historySection.style.display==='block')renderHistory();});
+
+  function renderHistory(){histList.innerHTML='';if(!history.length){histList.innerHTML='<div class="muted" style="text-align:center">No history yet</div>';return;}
+    history.forEach((rec,idx)=>{const det=document.createElement('details');det.className='record';
+      const summaryText=`#${history.length-idx} • ${rec.date} • ${rec.totalCarat.toFixed(6)} ct • ₹ ${fmt(rec.totalValue,2)}`;
+      det.innerHTML=`<summary><span>${summaryText}</span><span class="recordMeta">view</span></summary>`;
+      const body=document.createElement('div');body.className='recordBody';
+      let table=`<table class="miniTable"><thead><tr><th>Shape</th><th>Qty</th><th>Each Ct</th><th>Total Ct</th><th>Value (₹)</th></tr></thead><tbody>`;
+      rec.diamonds.forEach(d=>{const p=rec.prices&&rec.prices[d.shape]?rec.prices[d.shape]:0;const val=p*d.totalCt;table+=`<tr><td>${d.shape}</td><td>${d.qty}</td><td>${Number(d.eachCt).toFixed(6)}</td><td>${Number(d.totalCt).toFixed(6)}</td><td>₹${fmt(val,2)}</td></tr>`;});
+      table+='</tbody></table>';body.innerHTML=table+`<div class="miniTotals"><div class="muted">Recorded: ${rec.date}</div><div><strong>Total Ct:</strong> ${rec.totalCarat.toFixed(6)} ct &nbsp;&nbsp; <strong>Total Value:</strong> ₹${fmt(rec.totalValue,2)}</div></div>`;
+      const controls=document.createElement('div');controls.style.display='flex';controls.style.justifyContent='flex-end';controls.style.gap='8px';controls.style.marginTop='8px';
+      const delBtn=document.createElement('button');delBtn.className='btn small secondary';delBtn.textContent='🗑 Delete';delBtn.onclick=()=>{if(confirm('Delete this record?')){history.splice(idx,1);localStorage.setItem('svarna_history_v1',JSON.stringify(history));renderHistory();}};
+      controls.appendChild(delBtn);body.appendChild(controls);det.appendChild(body);histList.appendChild(det);});
+  }
+
+  exportCSVbtn.addEventListener('click',()=>{
+    if(!history.length){alert('No history to export');return;}
+    let csv='Record ID,Date,Shape,Qty,EachCt,TotalCt,PricePerCt,Value\n';
+    history.forEach(rec=>{rec.diamonds.forEach(d=>{const p=rec.prices[d.shape]||0;const val=p*d.totalCt;csv+=`${rec.id},"${rec.date}",${d.shape},${d.qty},${d.eachCt},${d.totalCt},${p},${val}\n`;});});
+    const blob=new Blob([csv],{type:'text/csv'}),url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='svarna_history.csv';a.click();URL.revokeObjectURL(url);
+  });
+
+  resetFormBtn.addEventListener('click',()=>{cart=[];latestSummary=null;updateCount();clearInputs();calcPrice.value='no';priceSection.style.display='none';resultText.textContent='Form reset. Add diamonds and click "Show Summary".';});
+})();
+</script>
+</body>
+</html>

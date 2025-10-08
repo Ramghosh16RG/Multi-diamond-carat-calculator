@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Luxury Jewelry Price Calculator</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Roboto:wght@400;500&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Roboto',sans-serif;}
+body{display:flex;min-height:100vh;background:#1a1a1a;color:#fff;}
+.sidebar{width:250px;background:#111;color:#fff;display:flex;flex-direction:column;padding:20px;box-shadow:2px 0 10px rgba(0,0,0,0.5);}
+.sidebar h2{text-align:center;margin-bottom:30px;font-family:'Playfair Display', serif;font-size:24px;letter-spacing:1px;color:#f1c40f;}
+.sidebar button{margin:8px 0;padding:14px;border:none;border-radius:8px;background:#222;color:#f1c40f;font-weight:500;cursor:pointer;transition:.3s;font-size:16px;}
+.sidebar button:hover{background:#f1c40f;color:#111;font-weight:600;}
+.main{flex:1;padding:30px;display:none;overflow-x:auto;}
+.main.active{display:block;}
+h1{margin-bottom:25px;font-family:'Playfair Display', serif;font-size:28px;color:#f1c40f;text-align:center;}
+form{max-width:600px;margin:auto;background:#222;padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,0.6);}
+form label{display:block;margin-top:15px;font-weight:500;color:#f1c40f;}
+input, select{width:100%;padding:10px;margin-top:5px;border:1px solid #444;border-radius:8px;background:#111;color:#fff;font-size:16px;}
+input:focus, select:focus{outline:none;border-color:#f1c40f;box-shadow:0 0 5px #f1c40f;}
+button.submit{margin-top:25px;padding:14px;width:100%;background:#f1c40f;color:#111;font-size:18px;font-weight:600;border:none;border-radius:10px;cursor:pointer;transition:.3s;}
+button.submit:hover{background:#e0b500;}
+.modal{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:1000;}
+.modal-content{background:#111;padding:25px;border-radius:15px;width:90%;max-width:500px;box-shadow:0 10px 30px rgba(0,0,0,0.8);}
+.modal-content h2{margin-bottom:15px;font-size:22px;color:#f1c40f;font-family:'Playfair Display', serif;}
+.modal-buttons{display:flex;justify-content:flex-end;margin-top:20px;}
+.modal-buttons button{padding:12px 18px;margin-left:12px;border:none;border-radius:8px;cursor:pointer;font-weight:500;font-size:15px;transition:.3s;}
+.ok-btn{background:#28a745;color:#fff;}
+.ok-btn:hover{background:#1e7e34;}
+.cancel-btn{background:#dc3545;color:#fff;}
+.cancel-btn:hover{background:#a71d2a;}
+#historyTable{width:100%;border-collapse:collapse;margin-top:20px;font-size:15px;}
+#historyTable th, #historyTable td{border:1px solid #333;padding:10px;text-align:center;}
+#historyTable th{background:#333;color:#f1c40f;font-weight:600;}
+#historyTable tbody tr:nth-child(even){background:#222;}
+#historyTable tbody tr:hover{background:#444;cursor:pointer;transition:.3s;}
+#exportBtn{padding:12px 20px;background:#f1c40f;color:#111;border:none;border-radius:8px;cursor:pointer;font-weight:500;margin-bottom:15px;}
+#exportBtn:hover{background:#e0b500;}
+@media(max-width:768px){body{flex-direction:column;}.sidebar{width:100%;flex-direction:row;justify-content:space-around;padding:10px;}.sidebar h2{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<h2>SVARNA</h2>
+<button onclick="showPage('calculatorPage')">Calculator</button>
+<button onclick="showPage('historyPage')">History</button>
+</div>
+
+<div class="main active" id="calculatorPage">
+<h1>💎 Jewelry Price Calculator 💎</h1>
+<form id="calcForm">
+<label>Gold Rate (24K per gram ₹):</label>
+<input type="number" id="goldRate24" step="any" required>
+
+<label>Does your design have diamonds?</label>
+<select id="hasDiamond">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<div id="diamondInputs" style="display:none;">
+<label>Diamond Rate (per carat ₹):</label>
+<input type="number" id="diamondRate" step="any">
+<label>Diamond Weight (carat):</label>
+<input type="number" id="diamondWeight" step="any">
+</div>
+
+<label>Gold Weight (grams):</label>
+<input type="number" id="goldWeight" step="any" required>
+
+<label>Gold Carat:</label>
+<select id="goldCarat">
+<option value="24K">24K</option>
+<option value="22K">22K</option>
+<option value="18K">18K</option>
+<option value="14K">14K</option>
+</select>
+
+<label>Mode:</label>
+<select id="mode">
+<option value="B2C">B2C (Customer)</option>
+<option value="B2B">B2B (Business)</option>
+</select>
+
+<label>Is this for a friend/relative?</label>
+<select id="isFriend">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<label>Apply Discount?</label>
+<select id="applyDiscount">
+<option value="no">No</option>
+<option value="yes">Yes</option>
+</select>
+
+<div id="discountInputs" style="display:none;">
+<label>Discount Percentage:</label>
+<select id="discountPercent">
+<option value="10">10%</option>
+<option value="20">20%</option>
+<option value="30">30%</option>
+<option value="40">40%</option>
+<option value="50">50%</option>
+<option value="60">60%</option>
+<option value="70">70%</option>
+</select>
+</div>
+
+<button type="submit" class="submit">Calculate Price</button>
+</form>
+</div>
+
+<div class="main" id="historyPage">
+<h1>📜 Calculation History</h1>
+<button id="exportBtn" onclick="exportCSV()">Export CSV</button>
+<table id="historyTable">
+<thead>
+<tr>
+<th>#</th>
+<th>Diamond Price</th>
+<th>Gold Price</th>
+<th>Making Charges</th>
+<th>Base Cost (Original Price)</th>
+<th>Brand Extra</th>
+<th>Actual Price</th>
+<th>Discount Applied</th>
+<th>Final Price</th>
+</tr>
+</thead>
+<tbody id="historyBody"></tbody>
+</table>
+
+<!-- Button to go to gem.html -->
+<div style="text-align:center; margin-top:20px;">
+    <button onclick="window.location.href='gem.html'" 
+            style="padding:12px 20px; background:#f1c40f; color:#111; border:none; border-radius:8px; cursor:pointer; font-weight:500; font-size:16px; transition:.3s;">
+        Go to Gem Page
+    </button>
+</div>
+</div>
+
+<div class="modal" id="resultModal">
+<div class="modal-content">
+<h2>📊 Pricing Breakdown</h2>
+<pre id="resultText"></pre>
+<div class="modal-buttons">
+<button class="ok-btn" onclick="closeModal()">OK</button>
+<button class="cancel-btn" onclick="resetForm()">Cancel</button>
+</div>
+</div>
+</div>
+
+<script>
+const calcForm=document.getElementById("calcForm");
+const hasDiamond=document.getElementById("hasDiamond");
+const diamondInputs=document.getElementById("diamondInputs");
+const applyDiscount=document.getElementById("applyDiscount");
+const discountInputs=document.getElementById("discountInputs");
+const resultModal=document.getElementById("resultModal");
+const resultText=document.getElementById("resultText");
+const historyBody=document.getElementById("historyBody");
+const isFriend=document.getElementById("isFriend");
+
+let history=[];
+const brandMargin=0.10; // 10% Brand Extra
+
+hasDiamond.addEventListener("change",()=>{diamondInputs.style.display=hasDiamond.value==="yes"?"block":"none";});
+applyDiscount.addEventListener("change",()=>{discountInputs.style.display=applyDiscount.value==="yes"?"block":"none";});
+
+calcForm.addEventListener("submit",function(e){
+    e.preventDefault();
+    const goldRate24=parseFloat(document.getElementById("goldRate24").value);
+    // Updated gold rates with +2% increment
+    const goldRates={"24K":goldRate24,"22K":goldRate24*0.94,"18K":goldRate24*0.77,"14K":goldRate24*0.61};
+    
+    let diamondPrice=0;
+    if(hasDiamond.value==="yes"){
+        const diamondRate=parseFloat(document.getElementById("diamondRate").value);
+        const diamondWeight=parseFloat(document.getElementById("diamondWeight").value);
+        diamondPrice=diamondRate*diamondWeight;
+    }
+
+    const goldWeight=parseFloat(document.getElementById("goldWeight").value);
+    const goldCarat=document.getElementById("goldCarat").value;
+    const goldPrice=goldWeight*goldRates[goldCarat];
+
+    const mode=document.getElementById("mode").value;
+    let makingCharges=0;
+    if(mode==="B2C"){makingCharges=goldWeight<=10?2500*goldWeight:2000*goldWeight;}
+    else{makingCharges=goldWeight<=10?2000*goldWeight:1500*goldWeight;}
+    if(isFriend.value==="yes"){makingCharges=1000*goldWeight;}
+
+    let baseCost=diamondPrice+goldPrice+makingCharges;
+    let brandExtra=0;
+    if(isFriend.value==="no"){brandExtra=baseCost*brandMargin;}
+
+    let actualPrice=baseCost+brandExtra; // after Brand Extra
+    let discountAmount=0;
+    let finalPrice=actualPrice;
+    if(applyDiscount.value==="yes"){
+        const discountPercent=parseFloat(document.getElementById("discountPercent").value)/100;
+        discountAmount=actualPrice*discountPercent;
+        finalPrice-=discountAmount;
+    }
+
+    let output="";
+    if(diamondPrice>0) output+=`Diamond Price: ₹${diamondPrice.toFixed(2)}\n`;
+    output+=`Gold Price (${goldCarat}): ₹${goldPrice.toFixed(2)}\n`;
+    output+=`Making Charges: ₹${makingCharges.toFixed(2)}\n`;
+    output+=`Base Cost (Original Cost): ₹${baseCost.toFixed(2)}\n`;
+    if(isFriend.value==="no") output+=`Brand Extra : ₹${brandExtra.toFixed(2)}\n`;
+    output+=`Actual Price (before discount): ₹${actualPrice.toFixed(2)}\n`;
+    output+=`Discount Applied: ₹${discountAmount.toFixed(2)}\n`;
+    output+=`Final Price (after discount): ₹${finalPrice.toFixed(2)}`;
+
+    resultText.textContent=output;
+    resultModal.style.display="flex";
+
+    history.push({
+        diamondPrice:diamondPrice.toFixed(2),
+        goldPrice:goldPrice.toFixed(2),
+        makingCharges:makingCharges.toFixed(2),
+        baseCost:baseCost.toFixed(2),
+        brandExtra:brandExtra.toFixed(2),
+        actualPrice:actualPrice.toFixed(2),
+        discountApplied:discountAmount.toFixed(2),
+        finalPrice:finalPrice.toFixed(2)
+    });
+    renderHistory();
+});
+
+function closeModal(){resultModal.style.display="none";}
+function resetForm(){calcForm.reset();diamondInputs.style.display="none";discountInputs.style.display="none";resultModal.style.display="none";}
+
+function renderHistory(){
+    historyBody.innerHTML="";
+    history.forEach((item,index)=>{
+        const tr=document.createElement("tr");
+        tr.innerHTML=`
+            <td>${index+1}</td>
+            <td>${item.diamondPrice}</td>
+            <td>${item.goldPrice}</td>
+            <td>${item.makingCharges}</td>
+            <td>${item.baseCost}</td>
+            <td>${item.brandExtra}</td>
+            <td>${item.actualPrice}</td>
+            <td>${item.discountApplied}</td>
+            <td>${item.finalPrice}</td>
+        `;
+        historyBody.appendChild(tr);
+    });
+}
+
+function showPage(pageId){
+    document.querySelectorAll(".main").forEach(page=>page.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+    if(pageId==="calculatorPage"){resetForm();}
+}
+
+function exportCSV(){
+    if(history.length===0){alert("No history to export!");return;}
+    let csvContent="data:text/csv;charset=utf-8,";
+    csvContent+="No,Diamond Price,Gold Price,Making Charges,Base Cost,Brand Extra,Actual Price,Discount Applied,Final Price\n";
+    history.forEach((item,index)=>{
+        csvContent+=`${index+1},${item.diamondPrice},${item.goldPrice},${item.makingCharges},${item.baseCost},${item.brandExtra},${item.actualPrice},${item.discountApplied},${item.finalPrice}\n`;
+    });
+    const encodedUri=encodeURI(csvContent);
+    const link=document.createElement("a");
+    link.setAttribute("href",encodedUri);
+    link.setAttribute("download","jewelry_history.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+</script>
+</body>
+</html>
