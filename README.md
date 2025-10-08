@@ -51,3 +51,10 @@ These values represent shape-based proportional constants derived from standard 
 ### 💻 Option 2: Run Locally
 ```bash
 python multi_diamond_carat_calculator.py
+
+
+## 🏷️ License
+
+This project is released under the **MIT License**.  
+Attribution is appreciated:  
+**Developed by Ramprasad Ghosh — SVARNA Luxury Tools™**
