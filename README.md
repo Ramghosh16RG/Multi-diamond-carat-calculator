@@ -36,6 +36,11 @@ The tool uses standardized diamond shape factors for accurate estimation:
 These values represent shape-based proportional constants derived from standard diamond weight calculations.
 
 ---
+## 🏷️ License
+
+This project is released under the **MIT License**.  
+Attribution is appreciated:  
+**Developed by Ramprasad Ghosh — SVARNA Luxury Tools™**
 
 ## 🚀 How to Use
 
@@ -53,8 +58,3 @@ These values represent shape-based proportional constants derived from standard 
 python multi_diamond_carat_calculator.py
 
 
-## 🏷️ License
-
-This project is released under the **MIT License**.  
-Attribution is appreciated:  
-**Developed by Ramprasad Ghosh — SVARNA Luxury Tools™**
